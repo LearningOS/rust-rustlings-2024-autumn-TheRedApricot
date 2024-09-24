@@ -2,7 +2,6 @@
     single linked list merge
     This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -26,13 +25,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: PartialOrd + Ord> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: PartialOrd + Ord> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -67,11 +66,33 @@ impl<T> LinkedList<T> {
         }
     }
     pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self {
-        let mut la = list_a.start;
-        let mut lb = list_b.start;
-        let mut l = LinkedList::new();
+        unsafe {
+            let mut l = LinkedList::new();
+            let mut na = list_a.start;
+            let mut nb = list_b.start;
 
-        while let (Some(a), Some(b)) = (la, lb) {}
+            while na.is_some() && nb.is_some() {
+                if na.unwrap().read().val <= nb.unwrap().read().val {
+                    l.add(na.unwrap().read().val);
+                    na = na.unwrap().read().next;
+                } else {
+                    l.add(nb.unwrap().read().val);
+                    nb = nb.unwrap().read().next;
+                }
+            }
+
+            while let Some(val) = na {
+                l.add(val.read().val);
+                na = na.unwrap().read().next;
+            }
+
+            while let Some(val) = nb {
+                l.add(val.read().val);
+                nb = nb.unwrap().read().next;
+            }
+
+            l
+        }
     }
 }
 

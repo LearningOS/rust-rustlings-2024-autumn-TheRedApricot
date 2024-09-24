@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: Vec::new(),
             comparator,
         }
     }
@@ -37,7 +36,26 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+
+        let mut i = self.count - 1;
+
+        loop {
+            if i == 0 {
+                break;
+            }
+
+            let p = self.parent_idx(i);
+
+            if (self.comparator)(&self.items[p], &self.items[i]) {
+                break;
+            } else {
+                self.items.swap(i, p);
+            }
+
+            i = p;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +75,16 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if left >= self.count {
+            idx
+        } else if right >= self.count || (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +110,40 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        self.count -= 1;
+        self.items.swap(0, self.count);
+        let result = self.items.pop();
+
+        let mut i = 0;
+
+        loop {
+            let left = self.left_child_idx(i);
+            let right = self.right_child_idx(i);
+
+            if left >= self.count {
+                break;
+            }
+            if right >= self.count {
+                if (self.comparator)(&self.items[left], &self.items[i]) {
+                    self.items.swap(left, i);
+                }
+                break;
+            }
+
+            if (self.comparator)(&self.items[left], &self.items[right]) {
+                self.items.swap(i, left);
+                i = left;
+            } else {
+                self.items.swap(i, right);
+                i = right;
+            }
+        }
+
+        result
     }
 }
 
